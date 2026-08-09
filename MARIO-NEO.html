@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mario-Neo</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at 50% 20%, #0f2a30 0%, #071b1f 55%, #030f12 100%);
+    background-color: #071b1f;
+    background-image:
+      linear-gradient(rgba(60,220,210,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(60,220,210,0.06) 1px, transparent 1px),
+      radial-gradient(circle at 50% 20%, #0f2a30 0%, #071b1f 55%, #030f12 100%);
+    background-size: 40px 40px, 40px 40px, cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', 'Trebuchet MS', sans-serif;
+    padding: 30px;
+  }
+
+  .title {
+    text-align: center;
+    color: #eafffb;
+    font-size: 40px;
+    letter-spacing: 4px;
+    font-weight: 700;
+    text-shadow: 0 0 8px #4be3d6, 0 0 24px #1fb8ab, 0 0 46px #0d6b63;
+    margin-bottom: 26px;
+  }
+  .title span { color: #4be3d6; }
+
+  .splash-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: radial-gradient(circle at 50% 20%, #0f2a30 0%, #071b1f 55%, #030f12 100%);
+    background-color: #071b1f;
+    background-image:
+      linear-gradient(rgba(60,220,210,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(60,220,210,0.06) 1px, transparent 1px),
+      radial-gradient(circle at 50% 20%, #0f2a30 0%, #071b1f 55%, #030f12 100%);
+    background-size: 40px 40px, 40px 40px, cover;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 46px;
+  }
+  .splash-title {
+    display: flex;
+    font-size: 52px;
+    font-weight: 700;
+    letter-spacing: 5px;
+    color: #eafffb;
+  }
+  .splash-letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(18px);
+    text-shadow: 0 0 8px #4be3d6, 0 0 24px #1fb8ab, 0 0 46px #0d6b63;
+    animation: letter-in 0.5s ease forwards;
+  }
+  @keyframes letter-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .splash-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .splash-loading-track {
+    width: 260px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    backdrop-filter: blur(6px);
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(255,255,255,0.2), inset 0 0 6px rgba(0,0,0,0.3);
+  }
+  .splash-loading-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #4fc3ff, #7ff5e8);
+    box-shadow: 0 0 8px #7ff5e8;
+    border-radius: 999px;
+    animation: splash-fill 4s linear forwards;
+  }
+  @keyframes splash-fill {
+    from { width: 0%; }
+    to   { width: 100%; }
+  }
+  .splash-loading-label {
+    color: #9ffcef;
+    font-size: 13px;
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+
+  .frame {
+    position: relative;
+    width: 420px;
+    border-radius: 22px;
+    border: 2px solid #6fe9dc;
+    box-shadow:
+      0 0 12px #4be3d6,
+      0 0 30px rgba(75,227,214,0.55),
+      inset 0 0 20px rgba(75,227,214,0.15);
+    padding: 30px 26px 26px;
+    background:
+      linear-gradient(180deg, rgba(66,190,178,0.28) 0%, rgba(45,150,150,0.22) 35%, rgba(20,90,120,0.30) 70%, rgba(15,70,110,0.32) 100%);
+    overflow: hidden;
+  }
+  .frame::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(100deg, transparent 20%, rgba(255,255,255,0.05) 35%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .label {
+    text-align: center;
+    color: #f2fffd;
+    font-size: 32px;
+    font-weight: 600;
+    text-shadow: 0 0 6px rgba(255,255,255,0.5);
+    margin-bottom: 18px;
+    letter-spacing: 1px;
+  }
+
+  .name-input {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: rgba(4,20,24,0.55);
+    border: 1.5px solid rgba(255,255,255,0.35);
+    border-radius: 10px;
+    color: #eafffb;
+    font-size: 18px;
+    padding: 10px 12px;
+    margin-bottom: 22px;
+    outline: none;
+    letter-spacing: 1px;
+  }
+  .name-input::placeholder { color: rgba(230,255,250,0.45); }
+  .name-input:focus {
+    border-color: #6fe9dc;
+    box-shadow: 0 0 10px rgba(111,233,220,0.6);
+  }
+
+  .char-box {
+    position: relative;
+    background: rgba(3,15,18,0.65);
+    border: 1.5px solid #8ff2e6;
+    border-radius: 10px;
+    box-shadow: 0 0 12px rgba(111,233,220,0.35), inset 0 0 18px rgba(0,0,0,0.5);
+    padding: 18px 14px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .char-nav {
+    background: transparent;
+    border: none;
+    color: #6fe9dc;
+    font-size: 26px;
+    cursor: pointer;
+    width: 34px;
+    height: 34px;
+    text-shadow: 0 0 8px #6fe9dc;
+    user-select: none;
+  }
+  .char-nav:hover { color: #eafffb; }
+
+  .speech-bubble {
+    position: absolute;
+    top: -14px;
+    right: 44px;
+    z-index: 5;
+    display: inline-block;
+  }
+  .cloud-text {
+    position: relative;
+    z-index: 2;
+    background: rgba(255,255,255,0.14);
+    border: 1.5px solid rgba(255,255,255,0.6);
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 8px 16px;
+    white-space: nowrap;
+    box-shadow: 0 0 10px rgba(255,255,255,0.3), inset 0 0 8px rgba(255,255,255,0.12);
+  }
+  .cloud-bump {
+    position: absolute;
+    z-index: 1;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.14);
+    border: 1.5px solid rgba(255,255,255,0.6);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 0 8px rgba(255,255,255,0.25);
+  }
+  .cloud-bump.b1 { width: 18px; height: 18px; top: -8px; left: 14px; }
+  .cloud-bump.b2 { width: 14px; height: 14px; top: -11px; left: 34px; }
+  .cloud-bump.b3 { width: 12px; height: 12px; top: -6px; right: 18px; }
+  .cloud-tail {
+    position: absolute;
+    z-index: 1;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.14);
+    border: 1.5px solid rgba(255,255,255,0.6);
+    backdrop-filter: blur(6px);
+  }
+  .cloud-tail.t1 { width: 11px; height: 11px; bottom: -11px; left: 20px; }
+  .cloud-tail.t2 { width: 6px; height: 6px; bottom: -19px; left: 13px; }
+
+  .char-stage {
+    width: 190px;
+    height: 210px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    margin: 0 6px;
+  }
+
+  .char-stage svg {
+    animation: hologram-pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes hologram-pulse {
+    0%   { filter: drop-shadow(0 0 3px #6fe9dc) drop-shadow(0 0 9px rgba(111,233,220,0.7)); opacity: 0.92; }
+    50%  { filter: drop-shadow(0 0 7px #9ffcef) drop-shadow(0 0 18px rgba(111,233,220,1)); opacity: 1; }
+    100% { filter: drop-shadow(0 0 3px #6fe9dc) drop-shadow(0 0 9px rgba(111,233,220,0.7)); opacity: 0.92; }
+  }
+
+  .ch-tag {
+    text-align: center;
+    color: #6fe9dc;
+    font-size: 15px;
+    letter-spacing: 3px;
+    font-weight: 600;
+    margin: 10px 0 20px;
+    text-shadow: 0 0 6px rgba(111,233,220,0.7);
+  }
+
+  .next-btn {
+    display: block;
+    width: 100%;
+    padding: 13px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(255,255,255,0.55);
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 0 14px rgba(255,255,255,0.25), inset 0 0 12px rgba(255,255,255,0.10);
+    transition: all 0.15s ease;
+  }
+  .next-btn:hover {
+    background: rgba(255,255,255,0.18);
+    box-shadow: 0 0 20px rgba(255,255,255,0.4), inset 0 0 14px rgba(255,255,255,0.18);
+  }
+  .next-btn:active { transform: scale(0.97); }
+
+  .guide-frame { display: none; }
+
+  .guide-title {
+    position: relative;
+    text-align: center;
+    color: #ffffff;
+    font-size: 40px;
+    font-family: 'Segoe Script', 'Brush Script MT', 'Comic Sans MS', cursive;
+    font-weight: 700;
+    margin: 4px 0 22px;
+    text-shadow: 0 0 6px rgba(255,255,255,0.6);
+  }
+  .guide-title::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    right: -10px;
+    top: 8px;
+    bottom: 4px;
+    background: linear-gradient(100deg, transparent 0%, #2fb5ac 8%, #46d0c4 30%, #2a9c92 55%, #3cc2b6 75%, transparent 100%);
+    opacity: 0.85;
+    z-index: -1;
+    transform: rotate(-1deg);
+    border-radius: 4px;
+  }
+
+  .guide-list {
+    list-style: none;
+    margin: 0 0 26px;
+    padding: 0;
+  }
+  .guide-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 2px;
+  }
+  .guide-check {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(255,255,255,0.65);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 0 8px rgba(255,255,255,0.25), inset 0 0 6px rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .guide-check svg { width: 15px; height: 15px; }
+  .guide-text {
+    color: #ffffff;
+    font-size: 18px;
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 4px rgba(255,255,255,0.35);
+  }
+
+  .back-btn {
+    background: transparent;
+    border: none;
+    color: #6fe9dc;
+    font-size: 14px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto 4px;
+    text-shadow: 0 0 6px rgba(111,233,220,0.7);
+  }
+  .glassy-back {
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(255,255,255,0.55);
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    text-shadow: none;
+    font-weight: 600;
+    padding: 10px 22px;
+    box-shadow: 0 0 10px rgba(255,255,255,0.25), inset 0 0 8px rgba(255,255,255,0.10);
+  }
+  .glassy-back:hover {
+    background: rgba(255,255,255,0.18);
+    box-shadow: 0 0 16px rgba(255,255,255,0.4), inset 0 0 10px rgba(255,255,255,0.16);
+  }
+  .wave-arm {
+    transform: rotate(-100deg);
+    animation: wave-swing 0.9s ease-in-out infinite;
+  }
+  @keyframes wave-swing {
+    0%, 100% { transform: rotate(-100deg); }
+    50%      { transform: rotate(-65deg); }
+  }
+
+  .welcome-frame { display: none; text-align: center; }
+
+  .welcome-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 26px;
+    border-radius: 999px;
+    border: 2px solid #6fe9dc;
+    box-shadow: 0 0 10px #4be3d6, 0 0 22px rgba(75,227,214,0.5);
+    margin-bottom: 30px;
+  }
+  .welcome-pill-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    background: #5be0c9;
+    box-shadow: 0 0 6px #5be0c9;
+  }
+  .welcome-pill-text {
+    color: #ffffff;
+    font-size: 22px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 6px rgba(255,255,255,0.5);
+  }
+
+  .welcome-name {
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 600;
+    margin-top: 22px;
+    text-shadow: 0 0 8px rgba(255,255,255,0.6);
+    letter-spacing: 0.5px;
+  }
+  .welcome-sub {
+    color: #9ffcef;
+    font-size: 14px;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+  .welcome-nav {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .welcome-nav .back-btn {
+    margin: 0;
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(255,255,255,0.55);
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    text-shadow: none;
+    font-weight: 600;
+    padding: 10px 22px;
+    box-shadow: 0 0 10px rgba(255,255,255,0.25), inset 0 0 8px rgba(255,255,255,0.10);
+  }
+  .welcome-nav .back-btn:hover {
+    background: rgba(255,255,255,0.18);
+    box-shadow: 0 0 16px rgba(255,255,255,0.4), inset 0 0 10px rgba(255,255,255,0.16);
+  }
+
+  .game-frame {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background:
+      linear-gradient(rgba(60,220,210,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(60,220,210,0.05) 1px, transparent 1px),
+      linear-gradient(180deg, #05161a 0%, #0a1f26 55%, #0e2a30 100%);
+    background-size: 34px 34px, 34px 34px, cover;
+    overflow: hidden;
+    font-family: 'Segoe UI', 'Trebuchet MS', sans-serif;
+  }
+
+  .game-hud {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    z-index: 4;
+  }
+  .hud-pill {
+    background: rgba(4,20,24,0.55);
+    border: 1.5px solid #6fe9dc;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(111,233,220,0.45);
+    padding: 8px 18px;
+    color: #eafffb;
+    font-size: 18px;
+    letter-spacing: 2px;
+    font-family: 'Courier New', monospace;
+  }
+  .hud-pill .coin-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #7ff5e8;
+    margin: 0 4px 0 8px;
+    vertical-align: middle;
+  }
+
+  .level-progress {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .level-progress-track {
+    width: 220px;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.4);
+    backdrop-filter: blur(6px);
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(255,255,255,0.2), inset 0 0 6px rgba(0,0,0,0.3);
+  }
+  .level-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #4fc3ff, #7ff5e8);
+    box-shadow: 0 0 8px #7ff5e8;
+    border-radius: 999px;
+    transition: width 0.2s linear;
+  }
+  .level-progress-label {
+    color: #ffffff;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+    text-shadow: 0 0 6px rgba(255,255,255,0.5);
+  }
+
+  .game-menu-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 6;
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(255,255,255,0.55);
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    font-size: 18px;
+    line-height: 1;
+    letter-spacing: 1px;
+    padding: 10px 14px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(255,255,255,0.25), inset 0 0 8px rgba(255,255,255,0.10);
+  }
+  .game-menu-btn:hover {
+    background: rgba(255,255,255,0.18);
+    box-shadow: 0 0 16px rgba(255,255,255,0.4), inset 0 0 10px rgba(255,255,255,0.16);
+  }
+
+  .game-menu-panel {
+    position: absolute;
+    top: 64px;
+    right: 20px;
+    z-index: 6;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(4,20,24,0.55);
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-radius: 12px;
+    padding: 12px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 0 14px rgba(111,233,220,0.35);
+  }
+  .game-menu-panel.open { display: flex; }
+  .menu-option {
+    background: rgba(255,255,255,0.10);
+    border: 1.5px solid rgba(255,255,255,0.55);
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 10px 22px;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 0 10px rgba(255,255,255,0.25), inset 0 0 8px rgba(255,255,255,0.10);
+  }
+  .menu-option:hover {
+    background: rgba(255,255,255,0.18);
+    box-shadow: 0 0 16px rgba(255,255,255,0.4), inset 0 0 10px rgba(255,255,255,0.16);
+  }
+
+  .game-world {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    transition: filter 0.35s ease;
+  }
+  .game-hud, .game-menu-btn, .level-progress {
+    transition: filter 0.35s ease, opacity 0.35s ease;
+  }
+  .game-world.screen-blur {
+    filter: blur(7px) brightness(0.65);
+  }
+  .game-hud.screen-blur, .game-menu-btn.screen-blur, .level-progress.screen-blur {
+    filter: blur(3px);
+    opacity: 0.6;
+  }
+  .camera {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    will-change: transform;
+  }
+  .skyline {
+    position: absolute;
+    bottom: 90px;
+    left: 0;
+    height: 45%;
+    display: flex;
+    align-items: flex-end;
+    gap: 22px;
+    padding: 0 20px;
+    opacity: 0.5;
+  }
+  .building {
+    flex: 0 0 auto;
+    width: 46px;
+    background: linear-gradient(180deg, rgba(111,233,220,0.05), rgba(111,233,220,0.14));
+    border: 1px solid rgba(111,233,220,0.35);
+    box-shadow: 0 0 12px rgba(111,233,220,0.2);
+  }
+
+  .ground-segment {
+    position: absolute;
+    bottom: 0;
+    height: 90px;
+    background: rgba(3,16,19,0.9);
+    border-top: 2px solid #6fe9dc;
+    box-shadow: 0 0 14px rgba(111,233,220,0.5);
+    background-image: repeating-linear-gradient(90deg, rgba(111,233,220,0.35) 0 1px, transparent 1px 70px);
+  }
+
+  .platform {
+    position: absolute;
+    bottom: 90px;
+    background: rgba(3,16,19,0.9);
+    border: 2px solid #6fe9dc;
+    box-shadow: 0 0 12px rgba(111,233,220,0.45);
+    border-radius: 3px;
+  }
+
+  .flag {
+    position: absolute;
+    bottom: 90px;
+    width: 8px;
+    height: 150px;
+    background: linear-gradient(180deg, #eafffb, #6fe9dc);
+    box-shadow: 0 0 10px #6fe9dc, 0 0 24px rgba(111,233,220,0.7);
+    z-index: 2;
+  }
+  .flag::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 14px 0 14px 34px;
+    border-color: transparent transparent transparent #7ff5e8;
+    filter: drop-shadow(0 0 6px #7ff5e8);
+  }
+
+  .game-player {
+    position: absolute;
+    bottom: 90px;
+    left: 260px;
+    width: 90px;
+    height: 120px;
+    z-index: 3;
+    transition: transform 0.08s linear;
+  }
+  .game-player svg { width: 100%; height: 100%; }
+  .armL, .armR { transform: rotate(0deg); transition: transform 0.18s ease; }
+  .game-player.jumping .armL { transform: rotate(120deg); }
+  .game-player.jumping .armR { transform: rotate(-120deg); }
+
+  .coin {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffffff, #d8fffa 55%, #8ff2e6 100%);
+    box-shadow: 0 0 8px #ffffff, 0 0 18px rgba(255,255,255,0.85), 0 0 30px rgba(143,242,230,0.6);
+    z-index: 2;
+    animation: coin-bob 1.6s ease-in-out infinite;
+  }
+  @keyframes coin-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+  .coin.collected { display: none; }
+
+  .obstacle {
+    position: absolute;
+    z-index: 2;
+    width: 34px;
+    background: rgba(255,60,60,0.18);
+    border: 2px solid #ff5a5a;
+    box-shadow: 0 0 10px #ff3b3b, 0 0 22px rgba(255,59,59,0.6);
+    border-radius: 3px 3px 0 0;
+  }
+
+  .obstacle-bar {
+    position: absolute;
+    z-index: 2;
+    height: 18px;
+    background: linear-gradient(180deg, #8fe0ff, #4fc3ff 45%, #1f8fd6);
+    border: 1.5px solid #bdeeff;
+    border-radius: 4px;
+    box-shadow: 0 0 8px #2ea9ff, 0 0 22px rgba(79,195,255,0.75), inset 0 2px 3px rgba(255,255,255,0.5);
+  }
+
+  .enemy {
+    position: absolute;
+    z-index: 2;
+    width: 34px;
+    height: 34px;
+    background: radial-gradient(circle at 35% 30%, #ffb3b3, #ff3b3b 55%, #7a0f0f 100%);
+    border-radius: 50% 50% 45% 45%;
+    box-shadow: 0 0 10px #ff3b3b, 0 0 24px rgba(255,59,59,0.8);
+    animation: enemy-bob 2s ease-in-out infinite;
+  }
+  .enemy .eye {
+    position: absolute;
+    top: 12px;
+    width: 5px;
+    height: 5px;
+    background: #1a0a24;
+    border-radius: 50%;
+  }
+  .enemy .eye.l { left: 8px; }
+  .enemy .eye.r { left: 20px; }
+  @keyframes enemy-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(var(--amp, -30px)); }
+  }
+
+  .gameover-popup {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 7;
+    display: none;
+    background: rgba(20,4,4,0.7);
+    border: 2px solid #ff5a5a;
+    border-radius: 16px;
+    box-shadow: 0 0 14px #ff3b3b, 0 0 32px rgba(255,59,59,0.5);
+    padding: 26px 46px;
+    text-align: center;
+  }
+  .gameover-title {
+    color: #ffffff;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-shadow: 0 0 8px rgba(255,90,90,0.8);
+  }
+  .gameover-stats {
+    color: #ffdada;
+    font-size: 15px;
+    letter-spacing: 1.5px;
+    margin: 10px 0 18px;
+  }
+  .gameover-actions { display: flex; gap: 14px; justify-content: center; }
+  .gameover-actions .next-btn {
+    width: auto;
+    padding: 10px 22px;
+    font-size: 15px;
+    border-color: #ff8a8a;
+  }
+
+  .win-popup {
+    border-color: #7ff5e8 !important;
+    box-shadow: 0 0 14px #4be3d6, 0 0 32px rgba(75,227,214,0.5) !important;
+    background: rgba(4,20,24,0.75) !important;
+  }
+  .win-popup .gameover-title { text-shadow: 0 0 8px rgba(111,233,220,0.9); }
+  .win-popup .gameover-stats { color: #d8fffa; }
+  .win-popup .next-btn { border-color: #6fe9dc; }
+
+  .level-banner {
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 6;
+    color: #ffffff;
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 22px rgba(111,233,220,0.6);
+    opacity: 0;
+  }
+  .level-banner.show { animation: ready-fade 1.8s ease forwards; }
+  .ready-popup {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 6;
+    background: rgba(4,20,24,0.65);
+    border: 2px solid #6fe9dc;
+    border-radius: 16px;
+    box-shadow: 0 0 14px #4be3d6, 0 0 32px rgba(75,227,214,0.5);
+    padding: 22px 44px;
+    text-align: center;
+    animation: ready-fade 2.4s ease forwards;
+  }
+  .modal-popup {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 7;
+    background: rgba(4,20,24,0.85);
+    border: 2px solid #6fe9dc;
+    border-radius: 16px;
+    box-shadow: 0 0 14px #4be3d6, 0 0 32px rgba(75,227,214,0.5);
+    padding: 26px 40px;
+    text-align: center;
+    max-width: 340px;
+  }
+  .ready-title {
+    color: #ffffff;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-shadow: 0 0 8px rgba(255,255,255,0.6);
+  }
+  .ready-sub {
+    color: #9ffcef;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    margin-top: 6px;
+  }
+  @keyframes ready-fade {
+    0%   { opacity: 0; transform: translate(-50%, -60%); }
+    12%  { opacity: 1; transform: translate(-50%, -50%); }
+    78%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%); }
+  }
+</style>
+</head>
+<body>
+<div class="splash-screen" id="splashScreen">
+  <div class="splash-title" id="splashTitle"></div>
+  <div class="splash-loading">
+    <div class="splash-loading-track"><div class="splash-loading-fill" id="splashFill"></div></div>
+    <div class="splash-loading-label">LOADING&#8230;</div>
+  </div>
+</div>
+
+<div id="mainWrapper" style="display:none;">
+  <div class="title">MARIO-<span>NEO</span></div>
+  <div class="frame">
+    <div class="label">Name</div>
+    <input class="name-input" type="text" placeholder="Enter your name" maxlength="14">
+
+    <div class="char-box">
+      <div class="speech-bubble" id="speechBubble">
+        <div class="cloud-bump b1"></div>
+        <div class="cloud-bump b2"></div>
+        <div class="cloud-bump b3"></div>
+        <div class="cloud-text">Hi I'm <span id="speechName">Byte</span></div>
+        <div class="cloud-tail t1"></div>
+        <div class="cloud-tail t2"></div>
+      </div>
+      <button class="char-nav" id="prevBtn" aria-label="previous character">&#10094;</button>
+      <div class="char-stage" id="charStage"></div>
+      <button class="char-nav" id="nextBtn" aria-label="next character">&#10095;</button>
+    </div>
+
+    <div class="ch-tag" id="chName">CH.01</div>
+
+    <button class="next-btn" id="goBtn">NEXT</button>
+  </div>
+
+  <div class="frame guide-frame" id="guideFrame">
+    <div class="guide-title">Guidelines</div>
+    <ul class="guide-list">
+      <li class="guide-item">
+        <span class="guide-check"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        <span class="guide-text">Move arrow keys to move</span>
+      </li>
+      <li class="guide-item">
+        <span class="guide-check"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        <span class="guide-text">Space bar or E to jump</span>
+      </li>
+      <li class="guide-item">
+        <span class="guide-check"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        <span class="guide-text">Collect coins along the way</span>
+      </li>
+      <li class="guide-item">
+        <span class="guide-check"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        <span class="guide-text">Avoid enemies and obstacles</span>
+      </li>
+      <li class="guide-item">
+        <span class="guide-check"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        <span class="guide-text">Reach the flag to finish</span>
+      </li>
+    </ul>
+    <button class="next-btn" id="startBtn">START</button>
+    <button class="back-btn glassy-back" id="backBtn">&#8592; back</button>
+  </div>
+
+  <div class="frame welcome-frame" id="welcomeFrame">
+    <div class="welcome-pill">
+      <span class="welcome-pill-text">welcome</span>
+    </div>
+    <div class="char-stage" id="welcomeStage" style="margin: 0 auto;"></div>
+    <div class="welcome-name" id="welcomeName">WELCOME, PLAYER</div>
+    <div class="welcome-sub" id="welcomeSub">CH.01 — BYTE READY</div>
+    <div class="welcome-nav">
+      <button class="back-btn" id="welcomeBackBtn">&#8592; back</button>
+      <button class="back-btn" id="welcomeNextBtn">next &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<div class="game-frame" id="gameFrame">
+  <div class="game-hud">
+    <div class="hud-pill" id="scoreHud">SCORE: 000000</div>
+    <div class="hud-pill">COINS:<span class="coin-dot"></span><span id="coinsHud">x0</span></div>
+  </div>
+
+  <div class="level-progress" id="levelProgress">
+    <div class="level-progress-track">
+      <div class="level-progress-fill" id="levelProgressFill"></div>
+    </div>
+    <div class="level-progress-label" id="levelProgressLabel">LEVEL 2 &#8594;</div>
+  </div>
+
+  <button class="game-menu-btn" id="menuBtn" aria-label="menu">&#9776;</button>
+  <div class="game-menu-panel" id="menuPanel">
+    <button class="menu-option" id="menuGuideBtn">GUIDELINES</button>
+    <button class="menu-option" id="menuExitBtn">EXIT</button>
+  </div>
+
+  <div class="modal-popup" id="ingameGuidePopup" style="display:none; text-align:left;">
+    <div class="guide-title" style="font-size:28px; margin-bottom:16px;">Guidelines</div>
+    <ul class="guide-list" style="margin-bottom:18px;">
+      <li class="guide-item">
+        <span class="guide-check"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        <span class="guide-text">Move arrow keys to move</span>
+      </li>
+      <li class="guide-item">
+        <span class="guide-check"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        <span class="guide-text">Space bar or E to jump</span>
+      </li>
+      <li class="guide-item">
+        <span class="guide-check"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        <span class="guide-text">Collect coins along the way</span>
+      </li>
+      <li class="guide-item">
+        <span class="guide-check"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        <span class="guide-text">Avoid enemies and obstacles</span>
+      </li>
+      <li class="guide-item">
+        <span class="guide-check"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        <span class="guide-text">Reach the flag to finish</span>
+      </li>
+    </ul>
+    <button class="menu-option" id="closeGuideBtn" style="display:block; margin:0 auto;">CLOSE</button>
+  </div>
+
+  <div class="game-world" id="gameWorld">
+    <div class="camera" id="camera">
+      <div class="skyline" id="skyline"></div>
+      <div id="groundLayer"></div>
+      <div id="platformsLayer"></div>
+      <div id="coinsLayer"></div>
+      <div id="obstaclesLayer"></div>
+      <div id="enemiesLayer"></div>
+      <div class="flag" id="flag" style="display:none;"></div>
+      <div class="game-player" id="gamePlayer"></div>
+    </div>
+  </div>
+
+  <div class="level-banner" id="levelBanner">LEVEL 1</div>
+
+  <div class="ready-popup" id="readyPopup">
+    <div class="ready-title" id="readyTitle">READY!</div>
+    <div class="ready-sub">use arrow keys to move</div>
+  </div>
+
+  <div class="gameover-popup" id="gameoverPopup">
+    <div class="gameover-title">GAME OVER</div>
+    <div class="gameover-stats" id="gameoverStats">SCORE: 0 &nbsp;|&nbsp; COINS: 0</div>
+    <div class="gameover-actions">
+      <button class="next-btn" id="retryBtn">RETRY</button>
+      <button class="next-btn" id="gameoverExitBtn">EXIT</button>
+    </div>
+  </div>
+
+  <div class="gameover-popup win-popup" id="winPopup">
+    <div class="gameover-title">LEVEL CLEARED!</div>
+    <div class="gameover-stats" id="winStats">SCORE: 0 &nbsp;|&nbsp; COINS: 0</div>
+    <div class="gameover-actions">
+      <button class="next-btn" id="playAgainBtn">PLAY AGAIN</button>
+      <button class="next-btn" id="winExitBtn">EXIT</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const characters = [
+  { name: "CH.01 — BYTE", build: "runner" },
+  { name: "CH.02 — VOLT", build: "brawler" },
+  { name: "CH.03 — ECHO", build: "scout" }
+];
+let idx = 0;
+
+const BODY_SHAPES = {
+  runner: {
+    head:  ['circle', { cx: 60, cy: 34, r: 20 }],
+    torso: ['rect',   { x: 46, y: 52, width: 28, height: 46, rx: 10 }],
+    armL:  ['rect',   { x: 30, y: 58, width: 14, height: 40, rx: 6 }],
+    armR:  ['rect',   { x: 76, y: 58, width: 14, height: 40, rx: 6 }],
+    legL:  ['rect',   { x: 46, y: 96, width: 12, height: 42, rx: 5 }],
+    legR:  ['rect',   { x: 62, y: 96, width: 12, height: 42, rx: 5 }]
+  },
+  brawler: {
+    head:  ['circle', { cx: 60, cy: 30, r: 18 }],
+    torso: ['rect',   { x: 38, y: 46, width: 44, height: 52, rx: 12 }],
+    armL:  ['rect',   { x: 18, y: 50, width: 20, height: 26, rx: 8 }],
+    armR:  ['rect',   { x: 82, y: 50, width: 20, height: 26, rx: 8 }],
+    legL:  ['rect',   { x: 42, y: 98, width: 14, height: 40, rx: 6 }],
+    legR:  ['rect',   { x: 64, y: 98, width: 14, height: 40, rx: 6 }]
+  },
+  scout: {
+    cape:  ['path',   { d: 'M60 10 L78 40 L60 32 L42 40 Z' }],
+    head:  ['circle', { cx: 60, cy: 40, r: 16 }],
+    torso: ['rect',   { x: 48, y: 55, width: 24, height: 44, rx: 10 }],
+    armL:  ['rect',   { x: 34, y: 60, width: 12, height: 34, rx: 5 }],
+    armR:  ['rect',   { x: 74, y: 60, width: 12, height: 34, rx: 5 }],
+    legL:  ['rect',   { x: 49, y: 99, width: 10, height: 38, rx: 4 }],
+    legR:  ['rect',   { x: 61, y: 99, width: 10, height: 38, rx: 4 }]
+  }
+};
+
+const ARM_R_SHOULDER = { runner: [83, 58], brawler: [92, 50], scout: [80, 60] };
+const ARM_L_SHOULDER = { runner: [37, 58], brawler: [28, 50], scout: [40, 60] };
+
+const EYES = {
+  runner:  [[52,30],[68,30]],
+  brawler: [[53,27],[67,27]],
+  scout:   [[55,38],[65,38]]
+};
+
+function shapeTag(tag, attrs, extra) {
+  const a = Object.entries(attrs).map(([k, v]) => `${k}="${v}"`).join(' ');
+  return `<${tag} ${a} ${extra || ''}/>`;
+}
+
+function charSVG(build, wave, noPedestal) {
+  const glow = '#7ff5e8';
+  const parts = BODY_SHAPES[build];
+  const keys = Object.keys(parts);
+
+  const partTag = (key) => {
+    const [tag, attrs] = parts[key];
+    return shapeTag(tag, attrs, `fill="rgba(111,233,220,0.10)" stroke="${glow}" stroke-width="1.6"`);
+  };
+
+  const [rsx, rsy] = ARM_R_SHOULDER[build];
+  const [lsx, lsy] = ARM_L_SHOULDER[build];
+  const others = keys.filter((k) => k !== 'armR' && k !== 'armL');
+  const waveClass = wave ? ' wave-arm' : '';
+
+  const outline = others.map(partTag).join('') +
+    `<g class="armL" style="transform-origin:${lsx}px ${lsy}px">${partTag('armL')}</g>` +
+    `<g class="armR${waveClass}" style="transform-origin:${rsx}px ${rsy}px">${partTag('armR')}</g>`;
+
+  const eyes = EYES[build].map(([ex, ey]) =>
+    `<circle class="pupil" cx="${ex}" cy="${ey}" r="3" fill="#eafffb"/>`
+  ).join('');
+
+  const pedId = `ped-${build}${wave ? '-w' : ''}-${Math.random().toString(36).slice(2, 7)}`;
+
+  const pedestal = noPedestal ? '' : `
+    <defs>
+      <radialGradient id="${pedId}" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#9ffcef" stop-opacity="0.65"/>
+        <stop offset="100%" stop-color="#0d3a3a" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <ellipse cx="60" cy="182" rx="46" ry="9" fill="url(#${pedId})"/>
+    <ellipse cx="60" cy="182" rx="34" ry="6" fill="none" stroke="${glow}" stroke-width="1.4" opacity="0.85"/>
+    <ellipse cx="60" cy="186" rx="42" ry="7.5" fill="none" stroke="${glow}" stroke-width="1" opacity="0.4"/>`;
+
+  return `<svg viewBox="0 0 120 200" width="150" height="200">
+    ${pedestal}
+    ${outline}
+    ${eyes}
+  </svg>`;
+}
+
+function render() {
+  document.getElementById("charStage").innerHTML = charSVG(characters[idx].build);
+  document.getElementById("chName").textContent = characters[idx].name;
+  document.getElementById("speechName").textContent = characters[idx].name.split("\u2014")[1].trim();
+}
+
+document.getElementById("prevBtn").onclick = () => {
+  idx = (idx - 1 + characters.length) % characters.length;
+  render();
+};
+document.getElementById("nextBtn").onclick = () => {
+  idx = (idx + 1) % characters.length;
+  render();
+};
+document.getElementById("goBtn").onclick = () => {
+  document.querySelector(".frame:not(.guide-frame)").style.display = "none";
+  document.getElementById("guideFrame").style.display = "block";
+};
+document.getElementById("backBtn").onclick = () => {
+  document.getElementById("guideFrame").style.display = "none";
+  document.querySelector(".frame:not(.guide-frame)").style.display = "block";
+};
+document.getElementById("startBtn").onclick = () => {
+  const name = (document.querySelector(".name-input").value || "Player").toUpperCase();
+  document.getElementById("guideFrame").style.display = "none";
+  document.getElementById("welcomeFrame").style.display = "block";
+  document.getElementById("welcomeStage").innerHTML = charSVG(characters[idx].build, true);
+  document.getElementById("welcomeName").textContent = "WELCOME, " + name;
+  document.getElementById("welcomeSub").textContent = "I'M " + characters[idx].name.split("—")[1].trim();
+};
+
+document.getElementById("welcomeBackBtn").onclick = () => {
+  document.getElementById("welcomeFrame").style.display = "none";
+  document.getElementById("guideFrame").style.display = "block";
+};
+document.getElementById("welcomeNextBtn").onclick = () => {
+  document.getElementById("welcomeFrame").style.display = "none";
+  startGame();
+};
+document.getElementById("menuBtn").onclick = () => {
+  document.getElementById("menuPanel").classList.toggle("open");
+};
+document.getElementById("menuExitBtn").onclick = () => {
+  document.getElementById("menuPanel").classList.remove("open");
+  document.getElementById("gameFrame").style.display = "none";
+  document.getElementById("welcomeFrame").style.display = "block";
+};
+document.getElementById("menuGuideBtn").onclick = () => {
+  document.getElementById("menuPanel").classList.remove("open");
+  levelTransitioning = true;
+  setScreenBlur(true);
+  document.getElementById("ingameGuidePopup").style.display = "block";
+};
+document.getElementById("closeGuideBtn").onclick = () => {
+  document.getElementById("ingameGuidePopup").style.display = "none";
+  setScreenBlur(false);
+  levelTransitioning = false;
+};
+
+function buildStaircase(startX, count, stepW, maxH) {
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    out.push({ x: startX + i * stepW, h: 24 + Math.round((i + 1) * (maxH / count)) });
+  }
+  return out;
+}
+function buildStaircaseDown(startX, count, stepW, maxH) {
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    out.push({ x: startX + i * stepW, h: 24 + Math.round((count - i) * (maxH / count)) });
+  }
+  return out;
+}
+
+function buildBarStaircase(startX, count, stepX, stepY, baseBottom, barW) {
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    out.push({ type: "bar", x: startX + i * stepX, bottom: baseBottom + i * stepY, width: barW || 90 });
+  }
+  return out;
+}
+function buildBarStaircaseDown(startX, count, stepX, stepY, baseBottom, barW) {
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    out.push({ type: "bar", x: startX + i * stepX, bottom: baseBottom + (count - 1 - i) * stepY, width: barW || 90 });
+  }
+  return out;
+}
+
+const LEVELS = [
+  {
+    label: "LEVEL 1",
+    width: 2900,
+    obstacles: [
+      { x: 620,  h: 40 },
+      { x: 860,  h: 55 },
+      { x: 1150, h: 40 },
+      { x: 1420, h: 70 },
+      { x: 1750, h: 45 },
+      { x: 2000, h: 90 },
+      { x: 2280, h: 50 },
+      { x: 2520, h: 65 }
+    ],
+    coins: [
+      { x: 300,  y: 120 }, { x: 420,  y: 120 },
+      { x: 740,  y: 200 }, { x: 990,  y: 220 },
+      { x: 1280, y: 200 }, { x: 1580, y: 240 },
+      { x: 1870, y: 200 }, { x: 2130, y: 260 },
+      { x: 2400, y: 220 }, { x: 2620, y: 150 }
+    ],
+    groundSegments: [{ x: 0, width: 2900 }],
+    flagX: null
+  },
+  {
+    label: "LEVEL 2",
+    width: 4200,
+    obstacles: [
+      ...buildBarStaircase(500, 5, 150, 45, 110),
+      ...buildBarStaircaseDown(1250, 5, 150, 45, 110),
+      ...buildBarStaircase(2150, 6, 140, 50, 110),
+      ...buildBarStaircaseDown(2990, 6, 140, 50, 110)
+    ],
+    coins: [
+      { x: 300,  y: 120 },
+      { x: 540,  y: 165 }, { x: 690,  y: 210 }, { x: 840,  y: 255 }, { x: 990,  y: 300 }, { x: 1140, y: 345 },
+      { x: 1290, y: 345 }, { x: 1440, y: 300 }, { x: 1590, y: 255 }, { x: 1740, y: 210 }, { x: 1890, y: 165 },
+      { x: 2000, y: 130 },
+      { x: 2190, y: 165 }, { x: 2330, y: 215 }, { x: 2470, y: 265 }, { x: 2610, y: 315 }, { x: 2750, y: 365 }, { x: 2890, y: 415 },
+      { x: 3030, y: 415 }, { x: 3170, y: 365 }, { x: 3310, y: 315 }, { x: 3450, y: 265 }, { x: 3590, y: 215 }, { x: 3730, y: 165 },
+      { x: 4000, y: 130 }
+    ],
+    enemies: [
+      { x: 828,  bottom: 218, range: 16, dur: 1.8 },
+      { x: 1578, bottom: 218, range: 16, dur: 2.0 },
+      { x: 2598, bottom: 278, range: 18, dur: 1.7 },
+      { x: 3298, bottom: 278, range: 18, dur: 2.1 }
+    ],
+    groundSegments: [
+      { x: 0,    width: 1950 },
+      { x: 2080, width: 1720 },
+      { x: 3930, width: 270 }
+    ],
+    flagX: 3980
+  }
+];
+
+let currentLevel = 0;
+let currentObstacles = [];
+let currentCoins = [];
+let currentEnemies = [];
+let currentPlatforms = [];
+let currentGroundSegments = [];
+let playerX = 260;
+let playerY = 0;
+let velocityY = 0;
+let facing = 1;
+let jumping = false;
+let gameOver = false;
+let levelTransitioning = false;
+let score = 0;
+let coinsCollected = 0;
+const keys = {};
+const GRAVITY = -1.1;
+const JUMP_FORCE = 24;
+const BAR_THICKNESS = 18;
+
+function supportHeightAt(centerX) {
+  let support = null;
+  const platformMargin = 6;
+  const groundMargin = 12;
+  for (let i = 0; i < currentPlatforms.length; i++) {
+    const pf = currentPlatforms[i];
+    if (centerX >= pf.x - platformMargin && centerX <= pf.x + pf.width + platformMargin) {
+      if (support === null || pf.bottom > support) support = pf.bottom;
+    }
+  }
+  const onGround = currentGroundSegments.some(
+    (seg) => centerX >= seg.x - groundMargin && centerX <= seg.x + seg.width + groundMargin
+  );
+  if (onGround && (support === null || 0 > support)) {
+    support = Math.max(support === null ? 0 : support, 0);
+  }
+  return support;
+}
+
+function updateHud() {
+  document.getElementById("scoreHud").textContent = "SCORE: " + String(score).padStart(6, "0");
+  document.getElementById("coinsHud").textContent = "x" + coinsCollected;
+}
+
+function generateSkyline(width) {
+  const skyline = document.getElementById("skyline");
+  skyline.innerHTML = "";
+  skyline.style.width = width + "px";
+  const count = Math.ceil(width / 68);
+  for (let i = 0; i < count; i++) {
+    const b = document.createElement("div");
+    b.className = "building";
+    b.style.height = (30 + Math.random() * 70) + "%";
+    skyline.appendChild(b);
+  }
+}
+
+function renderLevel(n) {
+  currentLevel = n;
+  const lvl = LEVELS[n];
+  document.getElementById("camera").style.width = lvl.width + "px";
+  generateSkyline(lvl.width);
+
+  const groundLayer = document.getElementById("groundLayer");
+  groundLayer.innerHTML = "";
+  const segs = lvl.groundSegments || [{ x: 0, width: lvl.width }];
+  currentGroundSegments = segs;
+  segs.forEach((seg) => {
+    const g = document.createElement("div");
+    g.className = "ground-segment";
+    g.style.left = seg.x + "px";
+    g.style.width = seg.width + "px";
+    groundLayer.appendChild(g);
+  });
+
+  const obsLayer = document.getElementById("obstaclesLayer");
+  obsLayer.innerHTML = "";
+  currentObstacles = lvl.obstacles.filter((o) => o.type !== "bar").map((o) => o.x);
+  currentPlatforms = lvl.obstacles.filter((o) => o.type === "bar").map((o) => ({ x: o.x, width: o.width || 90, bottom: o.bottom + BAR_THICKNESS }));
+  lvl.obstacles.forEach((o, i) => {
+    const d = document.createElement("div");
+    if (o.type === "bar") {
+      d.className = "obstacle-bar";
+      d.style.left = o.x + "px";
+      d.style.width = (o.width || 90) + "px";
+      d.style.bottom = o.bottom + "px";
+    } else {
+      d.className = "obstacle";
+      d.style.left = o.x + "px";
+      d.style.height = o.h + "px";
+      d.style.bottom = "90px";
+    }
+    obsLayer.appendChild(d);
+  });
+
+  const coinsLayer = document.getElementById("coinsLayer");
+  coinsLayer.innerHTML = "";
+  currentCoins = lvl.coins.map((c) => ({ x: c.x, collected: false, el: null }));
+  lvl.coins.forEach((c, i) => {
+    const d = document.createElement("div");
+    d.className = "coin";
+    d.style.left = c.x + "px";
+    d.style.bottom = c.y + "px";
+    coinsLayer.appendChild(d);
+    currentCoins[i].el = d;
+  });
+
+  const flagEl = document.getElementById("flag");
+  if (lvl.flagX) {
+    flagEl.style.display = "block";
+    flagEl.style.left = lvl.flagX + "px";
+  } else {
+    flagEl.style.display = "none";
+  }
+
+  const enemiesLayer = document.getElementById("enemiesLayer");
+  enemiesLayer.innerHTML = "";
+  const enemyList = lvl.enemies || [];
+  currentEnemies = enemyList.map((e) => e.x);
+  enemyList.forEach((e) => {
+    const wrap = document.createElement("div");
+    wrap.className = "enemy";
+    wrap.style.left = e.x + "px";
+    wrap.style.bottom = e.bottom + "px";
+    wrap.style.setProperty("--amp", (-1 * (e.range || 30)) + "px");
+    wrap.style.animationDuration = (e.dur || 2) + "s";
+    wrap.innerHTML = '<span class="eye l"></span><span class="eye r"></span>';
+    enemiesLayer.appendChild(wrap);
+  });
+
+  playerX = 260;
+  playerY = 0;
+  velocityY = 0;
+  facing = 1;
+  levelTransitioning = false;
+  document.getElementById("gamePlayer").style.left = playerX + "px";
+  document.getElementById("gamePlayer").style.bottom = "90px";
+  document.getElementById("gamePlayer").style.transform = "scaleX(1)";
+  document.getElementById("gamePlayer").classList.remove("jumping");
+  updateCamera();
+  updateLevelProgress();
+}
+
+function setScreenBlur(on) {
+  document.getElementById("gameWorld").classList.toggle("screen-blur", on);
+  document.querySelector(".game-hud").classList.toggle("screen-blur", on);
+  document.getElementById("menuBtn").classList.toggle("screen-blur", on);
+  document.getElementById("levelProgress").classList.toggle("screen-blur", on);
+}
+
+function showLevelBanner(text) {
+  const b = document.getElementById("levelBanner");
+  b.textContent = text;
+  b.classList.remove("show");
+  void b.offsetWidth;
+  b.classList.add("show");
+}
+
+function goToNextLevel() {
+  levelTransitioning = true;
+  setScreenBlur(true);
+  const next = currentLevel + 1;
+  showLevelBanner(LEVELS[next].label);
+  setTimeout(() => {
+    renderLevel(next);
+    setScreenBlur(false);
+  }, 600);
+}
+
+function showReadyPopup() {
+  const popup = document.getElementById("readyPopup");
+  popup.style.animation = "none";
+  void popup.offsetWidth;
+  popup.style.animation = "";
+}
+
+function startGame() {
+  document.getElementById("gameFrame").style.display = "block";
+  document.getElementById("gamePlayer").innerHTML = charSVG(characters[idx].build, false, true);
+  document.getElementById("readyTitle").textContent = characters[idx].name.split("—")[1].trim() + " READY!";
+  const popup = document.getElementById("readyPopup");
+  popup.style.animation = "none";
+  void popup.offsetWidth;
+  popup.style.opacity = "0";
+  document.getElementById("gameoverPopup").style.display = "none";
+  document.getElementById("winPopup").style.display = "none";
+  gameOver = false;
+  score = 0;
+  coinsCollected = 0;
+  updateHud();
+  renderLevel(0);
+  levelTransitioning = true;
+  setScreenBlur(true);
+  showLevelBanner(LEVELS[0].label);
+  setTimeout(() => {
+    popup.style.opacity = "";
+    showReadyPopup();
+    setTimeout(() => {
+      levelTransitioning = false;
+      setScreenBlur(false);
+    }, 1200);
+  }, 1850);
+}
+
+function endGame() {
+  gameOver = true;
+  document.getElementById("gameoverStats").innerHTML =
+    "SCORE: " + score + " &nbsp;|&nbsp; COINS: " + coinsCollected;
+  document.getElementById("gameoverPopup").style.display = "block";
+}
+
+function winGame() {
+  gameOver = true;
+  document.getElementById("winStats").innerHTML =
+    "SCORE: " + score + " &nbsp;|&nbsp; COINS: " + coinsCollected;
+  document.getElementById("winPopup").style.display = "block";
+}
+
+document.getElementById("retryBtn").onclick = () => { startGame(); };
+document.getElementById("gameoverExitBtn").onclick = () => {
+  document.getElementById("gameFrame").style.display = "none";
+  document.getElementById("gameoverPopup").style.display = "none";
+  document.getElementById("welcomeFrame").style.display = "block";
+};
+document.getElementById("playAgainBtn").onclick = () => { startGame(); };
+document.getElementById("winExitBtn").onclick = () => {
+  document.getElementById("gameFrame").style.display = "none";
+  document.getElementById("winPopup").style.display = "none";
+  document.getElementById("welcomeFrame").style.display = "block";
+};
+
+window.addEventListener("keydown", (e) => {
+  if (document.getElementById("gameFrame").style.display !== "block" || gameOver) return;
+  if (["ArrowLeft", "ArrowRight", "ArrowUp", " ", "e", "E"].includes(e.key)) e.preventDefault();
+  keys[e.key] = true;
+  if ((e.key === "ArrowUp" || e.key === " " || e.key === "e" || e.key === "E") && velocityY === 0) {
+    velocityY = JUMP_FORCE;
+  }
+});
+window.addEventListener("keyup", (e) => { keys[e.key] = false; });
+
+function updateCamera() {
+  const lvl = LEVELS[currentLevel];
+  const viewportW = document.getElementById("gameFrame").clientWidth || window.innerWidth;
+  const maxScroll = Math.max(0, lvl.width - viewportW);
+  const scrollX = Math.max(0, Math.min(maxScroll, playerX - viewportW / 2 + 45));
+  document.getElementById("camera").style.transform = `translateX(${-scrollX}px)`;
+}
+
+function updateLevelProgress() {
+  const lvl = LEVELS[currentLevel];
+  const target = lvl.flagX ? lvl.flagX : lvl.width - 160;
+  const percent = Math.max(0, Math.min(1, playerX / target));
+  document.getElementById("levelProgressFill").style.width = (percent * 100) + "%";
+  const label = document.getElementById("levelProgressLabel");
+  const nextLvl = LEVELS[currentLevel + 1];
+  label.textContent = nextLvl ? (nextLvl.label + " \u2192") : "FINISH \u2192";
+}
+
+function gameLoop() {
+  if (document.getElementById("gameFrame").style.display === "block" && !gameOver && !levelTransitioning) {
+    const lvl = LEVELS[currentLevel];
+    const p = document.getElementById("gamePlayer");
+    if (keys["ArrowLeft"]) { playerX -= 7; facing = -1; }
+    if (keys["ArrowRight"]) { playerX += 7; facing = 1; }
+    playerX = Math.max(0, Math.min(lvl.width - 90, playerX));
+
+    const playerCenter = playerX + 45;
+    const support = supportHeightAt(playerCenter);
+
+    if (support === null) {
+      velocityY += GRAVITY;
+      playerY += velocityY;
+      if (playerY < -260) {
+        endGame();
+        requestAnimationFrame(gameLoop);
+        return;
+      }
+    } else if (velocityY !== 0 || playerY > support) {
+      velocityY += GRAVITY;
+      playerY += velocityY;
+      if (playerY <= support) {
+        playerY = support;
+        velocityY = 0;
+      }
+    } else {
+      playerY = support;
+      velocityY = 0;
+    }
+
+    jumping = playerY > 0.5;
+    const airborne = velocityY !== 0;
+    p.classList.toggle("jumping", jumping);
+
+    const eyeBase = EYES[characters[idx].build];
+    if (eyeBase) {
+      let lookX = 0;
+      if (keys["ArrowLeft"]) lookX = -1.4;
+      else if (keys["ArrowRight"]) lookX = 1.4;
+      const lookY = jumping ? -1.3 : 0;
+      const pupils = p.querySelectorAll(".pupil");
+      pupils.forEach((el, i) => {
+        if (eyeBase[i]) {
+          el.setAttribute("cx", eyeBase[i][0] + lookX);
+          el.setAttribute("cy", eyeBase[i][1] + lookY);
+        }
+      });
+    }
+
+    p.style.left = playerX + "px";
+    p.style.bottom = (90 + playerY) + "px";
+    p.style.transform = `scaleX(${facing})`;
+    updateCamera();
+    updateLevelProgress();
+
+    currentCoins.forEach((c) => {
+      if (!c.collected && Math.abs(playerCenter - (c.x + 11)) < 40) {
+        c.collected = true;
+        c.el.classList.add("collected");
+        score += 50;
+        coinsCollected += 1;
+        updateHud();
+      }
+    });
+
+    currentObstacles.forEach((ox) => {
+      if (!airborne && Math.abs(playerCenter - (ox + 17)) < 26) {
+        endGame();
+      }
+    });
+
+    currentEnemies.forEach((ex) => {
+      if (!airborne && Math.abs(playerCenter - (ex + 17)) < 24) {
+        endGame();
+      }
+    });
+
+    if (lvl.flagX) {
+      if (Math.abs(playerCenter - (lvl.flagX + 4)) < 36) {
+        winGame();
+      }
+    } else if (playerX > lvl.width - 160) {
+      goToNextLevel();
+    }
+  }
+  requestAnimationFrame(gameLoop);
+}
+gameLoop();
+
+render();
+
+(function initSplash() {
+  const splashText = "MARIO-NEO";
+  const titleEl = document.getElementById("splashTitle");
+  splashText.split("").forEach((ch, i) => {
+    const span = document.createElement("span");
+    span.className = "splash-letter";
+    span.style.animationDelay = (i * 0.07) + "s";
+    span.textContent = ch;
+    if (i >= 6) span.style.color = "#4be3d6";
+    titleEl.appendChild(span);
+  });
+
+  setTimeout(() => {
+    document.getElementById("splashScreen").style.display = "none";
+    document.getElementById("mainWrapper").style.display = "block";
+  }, 4000);
+})();
+</script>
+</body>
+</html>
